@@ -3,6 +3,9 @@ package com.epam.trainer_service.controller;
 import com.epam.trainer_service.dto.TrainerWorkloadDto;
 import com.epam.trainer_service.entity.Trainer;
 import com.epam.trainer_service.service.TrainerService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +29,12 @@ public class TrainerController {
     String transactionId = UUID.randomUUID().toString();
 
     @PostMapping
+    @ApiOperation(value = "Register or update trainer training details", response = Trainer.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully registered the training"),
+            @ApiResponse(code = 204, message = "No trainer found for deletion"),
+
+    })
     public ResponseEntity<?> registerTrainerTraining( @RequestBody TrainerWorkloadDto trainerWorkloadDto){
 
         logInfo.info("Transaction ID: " + transactionId + " - Endpoint called: POST /registerTrainerTraining, Request: " + trainerWorkloadDto);
@@ -40,7 +49,12 @@ public class TrainerController {
     }
 
     @GetMapping("/{username}/{yearMonth}")
+    @ApiOperation(value = "Get total training hours for a specific month", response = Double.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully retrieved the total training hours"),
+            @ApiResponse(code = 400, message = "Invalid input, object invalid"),
 
+    })
     public ResponseEntity<Double> getTotalHoursForMonth(@PathVariable String username, @PathVariable String yearMonth) {
 
         double totalHours = trainerService.getTotalHoursForMonth(username, yearMonth);
