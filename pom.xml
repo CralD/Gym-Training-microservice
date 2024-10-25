@@ -17,6 +17,7 @@
         <module>training-service</module>
         <module>gym-service</module>
         <module>eureka-server</module>
+        <module>Auth-Server</module>
     </modules>
 
     <properties>
@@ -25,6 +26,8 @@
         <spring-cloud.version>2023.0.3</spring-cloud.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+
     <dependencyManagement>
         <dependencies>
             <dependency>

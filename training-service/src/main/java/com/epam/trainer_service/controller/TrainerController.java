@@ -7,7 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/trainers")
@@ -20,21 +23,28 @@ public class TrainerController {
         this.trainerService = trainerService;
     }
 
+    String transactionId = UUID.randomUUID().toString();
+
     @PostMapping
     public ResponseEntity<?> registerTrainerTraining( @RequestBody TrainerWorkloadDto trainerWorkloadDto){
-                Trainer trainerTraining = trainerService.saveOrUpdateUserTraining(trainerWorkloadDto);
+
+        logInfo.info("Transaction ID: " + transactionId + " - Endpoint called: POST /registerTrainerTraining, Request: " + trainerWorkloadDto);
+        Trainer trainerTraining = trainerService.saveOrUpdateUserTraining(trainerWorkloadDto);
         if (trainerTraining == null && "delete".equalsIgnoreCase(trainerWorkloadDto.getActionType())) {
-            logInfo.info("no trainer found");
+            logInfo.info("Transaction ID: " + transactionId + " - No trainer found for deletion");
             return ResponseEntity.noContent().build();
         }
-        logInfo.info("Training registered");
+        logInfo.info("Transaction ID: " + transactionId + " - Training registered: " + trainerTraining);
+
         return ResponseEntity.ok(trainerTraining);
     }
 
     @GetMapping("/{username}/{yearMonth}")
+
     public ResponseEntity<Double> getTotalHoursForMonth(@PathVariable String username, @PathVariable String yearMonth) {
+
         double totalHours = trainerService.getTotalHoursForMonth(username, yearMonth);
-        logInfo.info("the trainer total hours are:");
+        logInfo.info("Transaction ID: " + transactionId + " - Total hours for " + username + " in " + yearMonth + ": " + totalHours);
         return ResponseEntity.ok(totalHours);
     }
 

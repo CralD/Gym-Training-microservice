@@ -27,6 +27,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,6 +49,7 @@ public class TrainingService {
         this.trainingTypeRepository = trainingTypeRepository;
         this.trainingMicroservice = trainingMicroservice;
     }
+    String transactionId = UUID.randomUUID().toString();
 
     @Transactional
     public void saveTraining(Training training) {
@@ -92,7 +94,7 @@ public class TrainingService {
 
         trainingRepository.saveTraining(training);
 
-        logger.info("Training added: {}", training.getTrainingName());
+        logger.info("Transaction ID: " + transactionId + "Training added: {}", training.getTrainingName());
     }
 
     public List<Training> getTraineeTrainings(String username, Date fromDate, Date toDate, String trainerName, String trainingType) {

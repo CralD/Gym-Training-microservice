@@ -21,8 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -34,17 +36,21 @@ public class TraineeService {
     private final UserRepository userRepository;
     private final TrainingServiceMicrosService trainerService;
 
+
+
     private static final Logger logger = LoggerFactory.getLogger(TraineeService.class);
     @Autowired
     private PasswordEncoder passwordEncoder;
 
 
     @Autowired
-    public TraineeService(TraineeRepository traineeRepository, UserRepository userRepository,TrainingServiceMicrosService trainerService) {
+    public TraineeService(TraineeRepository traineeRepository, UserRepository userRepository, TrainingServiceMicrosService trainerService) {
         this.traineeRepository = traineeRepository;
         this.userRepository = userRepository;
         this.trainerService = trainerService;
+
     }
+    String transactionId = UUID.randomUUID().toString();
 
     @Transactional
     public CredentialsDto createTrainee(TraineeDto request) {
@@ -85,7 +91,7 @@ public class TraineeService {
         if (response.getStatusCode().is2xxSuccessful()) {
             // If successful, delete the trainee in Microservice 1
             traineeRepository.deleteTraineeByUsername(username);
-            logger.info("Trainee and training deleted successfully for username: {}", username);
+            logger.info("Transaction ID: " + transactionId + "Trainee and training deleted successfully for username: {}", username);
             return true;
         } else {
             logger.error("Failed to delete training for username: {}", username);
