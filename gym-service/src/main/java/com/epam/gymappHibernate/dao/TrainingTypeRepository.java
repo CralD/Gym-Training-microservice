@@ -30,6 +30,7 @@ public class TrainingTypeRepository {
             return null;
         }
     }
+
     public List<TrainingType> findAll() {
         TypedQuery<TrainingType> query = entityManager.createQuery(
                 "SELECT t FROM TrainingType t", TrainingType.class

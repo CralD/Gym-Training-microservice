@@ -23,17 +23,17 @@ public class TraineeRepository {
         this.entityManager = entityManager;
     }
 
-    @Transactional
+
     public void saveTrainee(Trainee trainee) {
         entityManager.persist(trainee);
     }
 
-    @Transactional
+
     public void updateTrainee(Trainee trainee) {
         entityManager.merge(trainee);
     }
 
-    @Transactional
+
     public void deleteTraineeByUsername(String username) {
         try {
             TypedQuery<Trainee> query = entityManager.createQuery(

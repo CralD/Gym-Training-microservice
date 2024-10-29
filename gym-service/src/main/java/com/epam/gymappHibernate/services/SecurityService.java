@@ -1,4 +1,5 @@
 package com.epam.gymappHibernate.services;
+
 import com.epam.gymappHibernate.dao.UserRepository;
 import com.epam.gymappHibernate.entity.SecurityUser;
 import com.epam.gymappHibernate.entity.User;
@@ -13,34 +14,33 @@ import java.util.*;
 
 import org.springframework.security.core.GrantedAuthority;
 
-    @Service
-    public class SecurityService implements UserDetailsService {
+@Service
+public class SecurityService implements UserDetailsService {
 
 
-        private UserRepository userRepository;
+    private UserRepository userRepository;
 
-        public SecurityService(UserRepository userRepository) {
-            this.userRepository = userRepository;
-        }
-
-        @Override
-        public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-            User user = userRepository.getUserByUsername(username);
-            if (user == null) {
-                throw new UsernameNotFoundException("User not found");
-            }
-            Set<GrantedAuthority> authorities = getAuthoritiesForUser(user);
-
-            return new SecurityUser(user, authorities);
-        }
-
-        private Set<GrantedAuthority> getAuthoritiesForUser(User user) {
-
-            Set<GrantedAuthority> authorities = new HashSet<>();
-            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-
-
-
-            return authorities;
-        }
+    public SecurityService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.getUserByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+        Set<GrantedAuthority> authorities = getAuthoritiesForUser(user);
+
+        return new SecurityUser(user, authorities);
+    }
+
+    private Set<GrantedAuthority> getAuthoritiesForUser(User user) {
+
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+
+
+        return authorities;
+    }
+}

@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
 @TestPropertySource(properties = "spring.datasource.url=jdbc:h2:mem:testdb1")
 class UserRepositoryTest {

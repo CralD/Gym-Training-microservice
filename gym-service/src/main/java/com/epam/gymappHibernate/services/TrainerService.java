@@ -68,7 +68,7 @@ public class TrainerService {
 
         trainerRepository.saveTrainer(trainer);
         logger.info("Trainer created: {} ", username);
-        return new CredentialsDto(username,password);
+        return new CredentialsDto(username, password);
     }
 
     public boolean authenticate(String username, String password) {
@@ -84,35 +84,35 @@ public class TrainerService {
 
     public Trainer getTrainerByUsername(String username) {
 
-            logger.info("Selecting Trainer profile: {}", username);
-            return trainerRepository.getTrainerByUsername(username);
+        logger.info("Selecting Trainer profile: {}", username);
+        return trainerRepository.getTrainerByUsername(username);
 
 
     }
 
-        @Transactional
-        public Trainer updateTrainerProfile(String username, TrainerDto trainerDto) {
+    @Transactional
+    public Trainer updateTrainerProfile(String username, TrainerDto trainerDto) {
 
-                logger.info("Updating Trainer profile: {}", username);
+        logger.info("Updating Trainer profile: {}", username);
 
-                Trainer trainer = getTrainerByUsername(username);
+        Trainer trainer = getTrainerByUsername(username);
 
-                trainer.getUser().setFirstName(trainerDto.getFirstName());
-                trainer.getUser().setLastName(trainerDto.getLastName());
-                trainer.getUser().setActive(trainerDto.isActive());
-                if (trainerDto.getSpecialization() != null) {
-                    TrainingType existingTrainingType = trainingTypeRepository.getTrainingTypeName(trainerDto.getSpecialization());
-                    if (existingTrainingType != null) {
-                        trainer.setSpecialization(existingTrainingType);
-                    } else {
-                        throw new IllegalArgumentException("Training type does not exist");
-                    }
-                }
-
-                trainerRepository.updateTrainer(trainer);
-                return trainer;
-
+        trainer.getUser().setFirstName(trainerDto.getFirstName());
+        trainer.getUser().setLastName(trainerDto.getLastName());
+        trainer.getUser().setActive(trainerDto.isActive());
+        if (trainerDto.getSpecialization() != null) {
+            TrainingType existingTrainingType = trainingTypeRepository.getTrainingTypeName(trainerDto.getSpecialization());
+            if (existingTrainingType != null) {
+                trainer.setSpecialization(existingTrainingType);
+            } else {
+                throw new IllegalArgumentException("Training type does not exist");
+            }
         }
+
+        trainerRepository.updateTrainer(trainer);
+        return trainer;
+
+    }
 
     @Transactional
     public void setTrainerActiveStatus(String username, boolean isActive) {
@@ -137,15 +137,14 @@ public class TrainerService {
     @Transactional
     public void changeTrainerPassword(String username, String newPassword, String password) {
 
-            Trainer trainer = trainerRepository.getTrainerByUsername(username);
-            if (trainer != null) {
-                logger.info("Changing Password");
-                trainer.getUser().setPassword(newPassword);
-                trainerRepository.updateTrainer(trainer);
-            }
+        Trainer trainer = trainerRepository.getTrainerByUsername(username);
+        if (trainer != null) {
+            logger.info("Changing Password");
+            trainer.getUser().setPassword(newPassword);
+            trainerRepository.updateTrainer(trainer);
+        }
 
     }
-
 
 
     public List<TrainerDtoResponse> findUnassignedTrainers(String traineeUsername) {
@@ -155,6 +154,7 @@ public class TrainerService {
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
+
     @Transactional
     public List<TrainerDtoResponse> updateTraineeTrainers(String traineeUsername, List<String> trainerUsernames) {
         Trainee trainee = traineeRepository.getTraineeByUsername(traineeUsername);
@@ -163,7 +163,7 @@ public class TrainerService {
         }
 
 
-       // List<Trainer> trainers = trainerRepository.getTrainerByUsername(trainerUsernames);
+        // List<Trainer> trainers = trainerRepository.getTrainerByUsername(trainerUsernames);
         Set<Trainer> trainers = trainerUsernames.stream()
                 .map(trainerRepository::getTrainerByUsername)
                 .filter(Objects::nonNull)
@@ -196,7 +196,7 @@ public class TrainerService {
         return trainer;
     }
 
-    public TrainerDto trainerDtoConverter (Trainer trainer){
+    public TrainerDto trainerDtoConverter(Trainer trainer) {
         TrainerDto trainerDto = new TrainerDto();
         trainerDto.setFirstName(trainer.getUser().getFirstName());
         trainerDto.setLastName(trainer.getUser().getLastName());
@@ -214,6 +214,7 @@ public class TrainerService {
         trainerDto.setTrainees(trainees);
         return trainerDto;
     }
+
     private TrainerDtoResponse convertToDto(Trainer trainer) {
         TrainerDtoResponse dto = new TrainerDtoResponse();
         dto.setUsername(trainer.getUser().getUserName());

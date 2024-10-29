@@ -13,13 +13,13 @@ public class DBHealthIndicator implements HealthIndicator {
 
     @Override
     public Health health() {
-        if (isDBHealthy()){
+        if (isDBHealthy()) {
             return Health.up().withDetail("External DB svc", "Healthy").build();
         }
         return Health.down().withDetail("External DB svc", "Is Not-Healthy").build();
     }
 
-    private boolean isDBHealthy(){
+    private boolean isDBHealthy() {
         try {
             jdbcTemplate.execute("SELECT 1");
             return true;

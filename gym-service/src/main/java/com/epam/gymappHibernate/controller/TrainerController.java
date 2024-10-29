@@ -28,8 +28,9 @@ public class TrainerController {
     private final TrainerService trainerService;
     private final TrainingService trainingService;
     private final TrainerMetrics trainerMetrics;
+
     @Autowired
-    public TrainerController(TrainerService trainerService,TrainingService trainingService,TrainerMetrics trainerMetrics) {
+    public TrainerController(TrainerService trainerService, TrainingService trainingService, TrainerMetrics trainerMetrics) {
         this.trainerService = trainerService;
         this.trainingService = trainingService;
         this.trainerMetrics = trainerMetrics;
@@ -46,7 +47,7 @@ public class TrainerController {
 
         CredentialsDto credentialsDto = trainerService.createTrainer(trainerDto);
 
-        UserDto responseDto = new UserDto(trainerDto.getFirstName(),trainerDto.getLastName());
+        UserDto responseDto = new UserDto(trainerDto.getFirstName(), trainerDto.getLastName());
         responseDto.setUsername(credentialsDto.getUsername());
         responseDto.setPassword(credentialsDto.getPassword());
         trainerMetrics.incrementTrainerRegistrationCounter();
@@ -60,17 +61,18 @@ public class TrainerController {
             @ApiResponse(code = 200, message = "Trainer found"),
             @ApiResponse(code = 404, message = "Trainer not found")
     })
-    public ResponseEntity<TrainerDto> getTraineeByUsername(@PathVariable("username") String username,@RequestParam("password") String password) {
+    public ResponseEntity<TrainerDto> getTraineeByUsername(@PathVariable("username") String username, @RequestParam("password") String password) {
         trainerMetrics.incrementGetTrainerCounter();
         try {
-        Trainer trainer = trainerService.getTrainerByUsername(username);
-        TrainerDto trainerDto = trainerService.trainerDtoConverter(trainer);
-        return ResponseEntity.ok(trainerDto);
+            Trainer trainer = trainerService.getTrainerByUsername(username);
+            TrainerDto trainerDto = trainerService.trainerDtoConverter(trainer);
+            return ResponseEntity.ok(trainerDto);
         } catch (SecurityException e) {
             throw new AuthenticationException("Trainer not found,invalid username or password");
         }
 
     }
+
     @PutMapping("/{username}")
     @ApiOperation(value = "Update a trainer by username")
     @ApiResponses(value = {
@@ -78,10 +80,10 @@ public class TrainerController {
             @ApiResponse(code = 400, message = "Invalid trainer data"),
             @ApiResponse(code = 404, message = "Trainer not found")
     })
-    public ResponseEntity<TrainerDto> updateTraineeByUsername(@PathVariable("username")String username,@RequestParam("password") String password,@RequestBody TrainerDto trainerDto){
+    public ResponseEntity<TrainerDto> updateTraineeByUsername(@PathVariable("username") String username, @RequestParam("password") String password, @RequestBody TrainerDto trainerDto) {
 
 
-            trainerMetrics.incrementUpdateTrainerCounter();
+        trainerMetrics.incrementUpdateTrainerCounter();
         Trainer trainer = trainerService.updateTrainerProfile(username, trainerDto);
         TrainerDto updateTrainerDto = trainerService.trainerDtoConverter(trainer);
         trainerMetrics.setTrainerUpdateStatus(true);
@@ -89,6 +91,7 @@ public class TrainerController {
 
 
     }
+
     @GetMapping("/trainings")
     @ApiOperation(value = "Get trainings for a trainer")
     @ApiResponses(value = {
@@ -119,7 +122,7 @@ public class TrainerController {
             @ApiResponse(code = 400, message = "Invalid request"),
             @ApiResponse(code = 404, message = "Trainer not found")
     })
-    public ResponseEntity<Void> activateTrainer(@PathVariable("username")String username,@RequestParam("isActive") boolean isActive) {
+    public ResponseEntity<Void> activateTrainer(@PathVariable("username") String username, @RequestParam("isActive") boolean isActive) {
         trainerMetrics.incrementActivateTrainerCounter();
 
 

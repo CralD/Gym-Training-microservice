@@ -65,7 +65,6 @@ class TraineeServiceTest {
     }
 
 
-
     @Test
     public void testAuthenticateSuccess() {
         String username = "Pedro.Garcia";
@@ -84,7 +83,6 @@ class TraineeServiceTest {
         boolean result = traineeService.authenticate(username, password);
         assertFalse(result);
     }
-
 
 
     @Test
@@ -171,6 +169,7 @@ class TraineeServiceTest {
             traineeService.updateTraineeProfile(username, traineeDto);
         });
     }
+
     @Test
     public void testChangeTraineePasswordSuccess() {
         String username = "Pedro.Garcia";

@@ -72,7 +72,7 @@ class TraineeRepositoryTest {
 
     @Test
     @Transactional
-    public void UpdateTraineeTest(){
+    public void UpdateTraineeTest() {
         // Create and save a new user
         User user = new User();
         user.setFirstName("juan");
@@ -103,7 +103,7 @@ class TraineeRepositoryTest {
 
     @Test
     @Transactional
-    public void DeleteTraineeByUsername1(){
+    public void DeleteTraineeByUsername1() {
         User user = new User();
         user.setFirstName("alicia");
         user.setLastName("sanchez");
@@ -127,7 +127,6 @@ class TraineeRepositoryTest {
         Trainee deletedTrainee = traineeRepository.getTraineeByUsername("alicia.sanchez");
         assertNull(deletedTrainee);
     }
-
 
 
     @Test

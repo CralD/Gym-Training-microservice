@@ -56,7 +56,6 @@ class TrainerServiceTest {
     }
 
 
-
     @Test
     public void testAuthenticateSuccess() {
         String username = "Pedro.Garcia";
@@ -98,7 +97,6 @@ class TrainerServiceTest {
     }
 
 
-
     @Test
     public void testUpdateTrainerProfileSuccess() {
         String username = "Pedro.Garcia";
@@ -124,7 +122,6 @@ class TrainerServiceTest {
     }
 
 
-
     @Test
     public void testChangeTrainerPasswordSuccess() {
 
@@ -139,7 +136,6 @@ class TrainerServiceTest {
     }
 
 
-
     @Test
     public void testSetTrainerActiveStatusSuccess() {
 
@@ -152,7 +148,6 @@ class TrainerServiceTest {
         assertEquals(isActive, trainer.getUser().isActive());
         verify(trainerRepository, times(1)).updateTrainer(trainer);
     }
-
 
 
     @Test

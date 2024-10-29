@@ -1,7 +1,6 @@
 package com.epam.gymappHibernate.prometheus;
 
 
-
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
@@ -61,6 +60,7 @@ public class TrainerMetrics {
             trainerUpdateGauge.set(0);
         }
     }
+
     public void incrementGetTrainerCounter() {
         getTrainerCounter.inc();
     }

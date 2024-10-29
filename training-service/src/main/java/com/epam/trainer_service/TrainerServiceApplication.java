@@ -9,8 +9,8 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 public class TrainerServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(TrainerServiceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(TrainerServiceApplication.class, args);
+    }
 
 }

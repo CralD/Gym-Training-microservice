@@ -18,6 +18,7 @@ public class UserController {
     private final TraineeService traineeService;
 
     private final TrainerService trainerService;
+
     @Autowired
     public UserController(TraineeService traineeService, TrainerService trainerService) {
         this.traineeService = traineeService;
@@ -41,6 +42,7 @@ public class UserController {
             return new ResponseEntity<>("Wrong username or password", HttpStatus.UNAUTHORIZED);
         }
     }
+
     @PutMapping("/{username}/password")
     @ApiOperation(value = "Update user password")
     @ApiResponses(value = {
@@ -55,7 +57,7 @@ public class UserController {
         if (traineeService.authenticate(username, password)) {
             traineeService.changeTraineePassword(username, newPassword, password);
             return new ResponseEntity<>("Password updated successfully", HttpStatus.OK);
-        }  else {
+        } else {
             return new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED);
         }
     }

@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -39,16 +40,21 @@ public class TrainingService {
     private TrainingTypeRepository trainingTypeRepository;
     private TrainingServiceMicrosService trainingMicroservice;
 
+    private static final String TRAINING_QUEUE = "training.add.queue";
+    @Autowired
+    private JmsTemplate jmsTemplate;
+
     private static final Logger logger = LoggerFactory.getLogger(TrainingService.class);
 
     @Autowired
-    public TrainingService(TrainingRepository trainingRepository, TrainerRepository trainerRepository, TraineeRepository traineeRepository,TrainingTypeRepository trainingTypeRepository,TrainingServiceMicrosService trainingMicroservice) {
+    public TrainingService(TrainingRepository trainingRepository, TrainerRepository trainerRepository, TraineeRepository traineeRepository, TrainingTypeRepository trainingTypeRepository, TrainingServiceMicrosService trainingMicroservice) {
         this.trainingRepository = trainingRepository;
         this.traineeRepository = traineeRepository;
         this.trainerRepository = trainerRepository;
         this.trainingTypeRepository = trainingTypeRepository;
         this.trainingMicroservice = trainingMicroservice;
     }
+
     String transactionId = UUID.randomUUID().toString();
 
     @Transactional
@@ -56,9 +62,10 @@ public class TrainingService {
         trainingRepository.saveTraining(training);
         logger.info("Training saved: {}", training.getTrainingId());
     }
+
     @Transactional
-    @CircuitBreaker(name ="TrainingService")
-    public void addTraining(String Traineeusername, String Trainerusername,TrainingDto request) {
+    @CircuitBreaker(name = "TrainingService")
+    public void addTraining(String Traineeusername, String Trainerusername, TrainingDto request) {
 
         Trainee trainee = traineeRepository.getTraineeByUsername(Traineeusername);
 
@@ -79,10 +86,7 @@ public class TrainingService {
         dto.setTrainingDate(isoDate);
         dto.setTrainingDuration(request.getTrainingDuration());
         dto.setActionType("ADD");
-        ResponseEntity<?> response = trainingMicroservice.registerTrainerTraining(dto);
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Failed to register training in Microservice 2");
-        }
+
 
         Training training = new Training();
         training.setTrainingName(request.getTrainingName());
@@ -91,7 +95,7 @@ public class TrainingService {
         training.setTrainingType(trainer.getSpecialization());
         training.setTrainee(trainee);
         training.setTrainer(trainer);
-
+        jmsTemplate.convertAndSend(TRAINING_QUEUE, dto);
         trainingRepository.saveTraining(training);
 
         logger.info("Transaction ID: " + transactionId + "Training added: {}", training.getTrainingName());
@@ -108,6 +112,7 @@ public class TrainingService {
                 username, fromDate, toDate, traineeName);
         return trainingRepository.getTrainerTrainings(username, fromDate, toDate, traineeName);
     }
+
     public List<TrainingTypeDto> getAllTrainingTypes() {
         List<TrainingType> trainingTypes = trainingTypeRepository.findAll();
         return trainingTypes.stream().map(trainingType -> {

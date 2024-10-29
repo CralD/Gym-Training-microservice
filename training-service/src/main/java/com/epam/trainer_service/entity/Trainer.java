@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Entity
-@Table(name= "TRAINER")
+@Table(name = "TRAINER")
 @Getter
 @Setter
 public class Trainer {

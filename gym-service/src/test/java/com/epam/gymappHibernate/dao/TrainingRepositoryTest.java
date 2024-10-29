@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
 @TestPropertySource(properties = "spring.datasource.url=jdbc:h2:mem:testdb4")
 class TrainingRepositoryTest {
@@ -56,7 +57,7 @@ class TrainingRepositoryTest {
         assertNotNull(savedTraining);
         assertEquals("cardio", savedTraining.getTrainingName());
         assertEquals(60, savedTraining.getTrainingDuration());
-        assertEquals(expectedDate,actualDate);
+        assertEquals(expectedDate, actualDate);
     }
 
     @Test
@@ -106,6 +107,7 @@ class TrainingRepositoryTest {
         assertEquals("john.doe", savedTraining.getTrainer().getUser().getUserName());
         assertEquals("Paolo.Guerrero", savedTraining.getTrainee().getUser().getUserName());
     }
+
     @Test
     @Transactional
     public void testSaveAndFindTrainingsForTrainees() {
@@ -148,7 +150,7 @@ class TrainingRepositoryTest {
 
         entityManager.flush();
         entityManager.clear();
-        List<Training> savedTrainings = trainingRepository.getTraineeTrainings("john.doe", new Date(System.currentTimeMillis() - 1000 * 60 * 60 * 24 ), new Date(), "Paolo","Cardio");
+        List<Training> savedTrainings = trainingRepository.getTraineeTrainings("john.doe", new Date(System.currentTimeMillis() - 1000 * 60 * 60 * 24), new Date(), "Paolo", "Cardio");
         assertNotNull(savedTrainings);
         Training savedTraining = savedTrainings.get(0);
         assertEquals("Paolo", savedTraining.getTrainer().getUser().getFirstName());

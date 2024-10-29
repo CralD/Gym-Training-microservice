@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -35,11 +36,11 @@ public class TrainerController {
             @ApiResponse(code = 204, message = "No trainer found for deletion"),
 
     })
-    public ResponseEntity<?> registerTrainerTraining( @RequestBody TrainerWorkloadDto trainerWorkloadDto){
+    public ResponseEntity<?> registerTrainerTraining(@RequestBody TrainerWorkloadDto trainerWorkloadDto) {
 
         logInfo.info("Transaction ID: " + transactionId + " - Endpoint called: POST /registerTrainerTraining, Request: " + trainerWorkloadDto);
-        Trainer trainerTraining = trainerService.saveOrUpdateUserTraining(trainerWorkloadDto);
-        if (trainerTraining == null && "delete".equalsIgnoreCase(trainerWorkloadDto.getActionType())) {
+        Optional<Trainer> trainerTraining = trainerService.saveOrUpdateUserTraining(trainerWorkloadDto);
+        if (trainerTraining.isEmpty() && "delete".equalsIgnoreCase(trainerWorkloadDto.getActionType())) {
             logInfo.info("Transaction ID: " + transactionId + " - No trainer found for deletion");
             return ResponseEntity.noContent().build();
         }
@@ -55,13 +56,12 @@ public class TrainerController {
             @ApiResponse(code = 400, message = "Invalid input, object invalid"),
 
     })
-    public ResponseEntity<Double> getTotalHoursForMonth(@PathVariable String username, @PathVariable String yearMonth) {
+    public ResponseEntity<Optional<Double>> getTotalHoursForMonth(@PathVariable String username, @PathVariable String yearMonth) {
 
-        double totalHours = trainerService.getTotalHoursForMonth(username, yearMonth);
+        Optional<Double> totalHours = trainerService.getTotalHoursForMonth(username, yearMonth);
         logInfo.info("Transaction ID: " + transactionId + " - Total hours for " + username + " in " + yearMonth + ": " + totalHours);
         return ResponseEntity.ok(totalHours);
     }
-
 
 
 }

@@ -10,8 +10,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableFeignClients
 public class GymAppHibernateApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(GymAppHibernateApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(GymAppHibernateApplication.class, args);
+    }
 
 }

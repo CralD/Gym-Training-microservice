@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -35,7 +36,9 @@ public class TraineeService {
     @Autowired
     private final UserRepository userRepository;
     private final TrainingServiceMicrosService trainerService;
-
+    private static final String TRAINEE_QUEUE = "trainee.delete.queue";
+    @Autowired
+    private JmsTemplate jmsTemplate;
 
 
     private static final Logger logger = LoggerFactory.getLogger(TraineeService.class);
@@ -50,6 +53,7 @@ public class TraineeService {
         this.trainerService = trainerService;
 
     }
+
     String transactionId = UUID.randomUUID().toString();
 
     @Transactional
@@ -67,7 +71,7 @@ public class TraineeService {
         userRepository.saveUser(user);
         traineeRepository.saveTrainee(trainee);
         logger.info("Trainee created: {} ", username);
-        return new CredentialsDto(username,password);
+        return new CredentialsDto(username, password);
     }
 
     public boolean authenticate(String username, String password) {
@@ -82,7 +86,7 @@ public class TraineeService {
     }
 
     @Transactional
-    @CircuitBreaker(name ="TrainingService")
+    @CircuitBreaker(name = "TrainingService")
     public boolean deleteTrainee(String username) {
         TrainerWorkloadDto dto = new TrainerWorkloadDto();
         dto.setUserName(username);
@@ -90,6 +94,7 @@ public class TraineeService {
         ResponseEntity<?> response = trainerService.registerTrainerTraining(dto);
         if (response.getStatusCode().is2xxSuccessful()) {
             // If successful, delete the trainee in Microservice 1
+            jmsTemplate.convertAndSend(TRAINEE_QUEUE, dto);
             traineeRepository.deleteTraineeByUsername(username);
             logger.info("Transaction ID: " + transactionId + "Trainee and training deleted successfully for username: {}", username);
             return true;
@@ -102,15 +107,14 @@ public class TraineeService {
     }
 
 
-    public Trainee getTraineeByUsername(String username ) {
+    public Trainee getTraineeByUsername(String username) {
 
-            logger.info("Selecting Trainee profile: {}", username);
-            Trainee trainee = traineeRepository.getTraineeByUsername(username);
-            if (trainee == null) {
-                throw new NoTrainingsFoundException("Trainee not found");
-            }
-            return trainee;
-
+        logger.info("Selecting Trainee profile: {}", username);
+        Trainee trainee = traineeRepository.getTraineeByUsername(username);
+        if (trainee == null) {
+            throw new NoTrainingsFoundException("Trainee not found");
+        }
+        return trainee;
 
 
     }
@@ -118,22 +122,22 @@ public class TraineeService {
     @Transactional
     public Trainee updateTraineeProfile(String username, TraineeDto traineeDto) {
 
-            logger.info("Updating Trainee profile: {}", username);
+        logger.info("Updating Trainee profile: {}", username);
 
-            Trainee trainee = getTraineeByUsername(username);
+        Trainee trainee = getTraineeByUsername(username);
 
-            trainee.getUser().setFirstName(traineeDto.getFirstName());
-            trainee.getUser().setLastName(traineeDto.getLastName());
-            trainee.getUser().setActive(traineeDto.isActive());
-            if (traineeDto.getDateOfBirth() != null) {
-                trainee.setDateOfBirth(traineeDto.getDateOfBirth());
-            }
-            if (traineeDto.getAddress() != null) {
-                trainee.setAddress(traineeDto.getAddress());
-            }
-            traineeRepository.updateTrainee(trainee);
+        trainee.getUser().setFirstName(traineeDto.getFirstName());
+        trainee.getUser().setLastName(traineeDto.getLastName());
+        trainee.getUser().setActive(traineeDto.isActive());
+        if (traineeDto.getDateOfBirth() != null) {
+            trainee.setDateOfBirth(traineeDto.getDateOfBirth());
+        }
+        if (traineeDto.getAddress() != null) {
+            trainee.setAddress(traineeDto.getAddress());
+        }
+        traineeRepository.updateTrainee(trainee);
 
-            return trainee;
+        return trainee;
 
     }
 
@@ -156,14 +160,14 @@ public class TraineeService {
     public void setTraineeActiveStatus(String username, boolean isActive) {
         logger.info("Setting active status for trainee: {}", username);
 
-            Trainee trainee = traineeRepository.getTraineeByUsername(username);
-            if (trainee != null) {
-                trainee.getUser().setActive(isActive);
-                traineeRepository.updateTrainee(trainee);
-                logger.info("Active status for trainee {} set to {}", username, isActive);
-            } else {
-                logger.warn("Trainee {} not found", username);
-            }
+        Trainee trainee = traineeRepository.getTraineeByUsername(username);
+        if (trainee != null) {
+            trainee.getUser().setActive(isActive);
+            traineeRepository.updateTrainee(trainee);
+            logger.info("Active status for trainee {} set to {}", username, isActive);
+        } else {
+            logger.warn("Trainee {} not found", username);
+        }
 
     }
 
@@ -179,6 +183,7 @@ public class TraineeService {
 
         return trainee;
     }
+
     public TraineeDto convertToTraineeDto(Trainee trainee) {
         TraineeDto traineeDto = new TraineeDto();
         traineeDto.setFirstName(trainee.getUser().getFirstName());

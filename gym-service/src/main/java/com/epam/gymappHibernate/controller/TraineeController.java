@@ -56,12 +56,12 @@ public class TraineeController {
             @ApiResponse(code = 200, message = "Trainee registered successfully"),
             @ApiResponse(code = 400, message = "Invalid trainee data")
     })
-    public ResponseEntity<UserDto> RegisterTrainee(@RequestBody TraineeDto request){
+    public ResponseEntity<UserDto> RegisterTrainee(@RequestBody TraineeDto request) {
 
 
         CredentialsDto credentialsDto = traineeService.createTrainee(request);
 
-       UserDto responseDTO = new UserDto(request.getFirstName(), request.getLastName());
+        UserDto responseDTO = new UserDto(request.getFirstName(), request.getLastName());
         responseDTO.setUsername(credentialsDto.getUsername());
         responseDTO.setPassword(credentialsDto.getPassword());
         traineeMetrics.incrementTraineeRegistrationCounter();
@@ -82,7 +82,7 @@ public class TraineeController {
             return ResponseEntity.ok(traineeDto);
 
         } catch (SecurityException e) {
-           throw new AuthenticationException("Trainee not found,invalid username or password");
+            throw new AuthenticationException("Trainee not found,invalid username or password");
         }
     }
 
@@ -94,10 +94,10 @@ public class TraineeController {
             @ApiResponse(code = 400, message = "Invalid trainee data"),
             @ApiResponse(code = 404, message = "Trainee not found")
     })
-    public ResponseEntity<TraineeDto> updateTraineeByUsername(@PathVariable("username")String username,@RequestBody TraineeDto traineeDto){
+    public ResponseEntity<TraineeDto> updateTraineeByUsername(@PathVariable("username") String username, @RequestBody TraineeDto traineeDto) {
 
 
-            traineeMetrics.incrementUpdateTraineeCounter();
+        traineeMetrics.incrementUpdateTraineeCounter();
         Trainee trainee = traineeService.updateTraineeProfile(username, traineeDto);
         TraineeDto updateTraineeDto = traineeService.convertToTraineeDto(trainee);
 
@@ -113,8 +113,7 @@ public class TraineeController {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 404, message = "Trainee not found")
     })
-    public ResponseEntity<?> deleteTraineeByUsername(@PathVariable("username")String username){
-
+    public ResponseEntity<?> deleteTraineeByUsername(@PathVariable("username") String username) {
 
 
         boolean isDeleted = traineeService.deleteTrainee(username);
@@ -127,6 +126,7 @@ public class TraineeController {
 
 
     }
+
     @GetMapping("/unassigned/{username}")
     @ApiOperation(value = "Get unassigned trainers for a trainee")
     @ApiResponses(value = {
@@ -140,6 +140,7 @@ public class TraineeController {
         List<TrainerDtoResponse> trainers = trainerService.findUnassignedTrainers(username);
         return ResponseEntity.ok(trainers);
     }
+
     @PutMapping("/update-trainers/{username}")
     @ApiOperation(value = "Update trainers for a trainee")
     @ApiResponses(value = {
@@ -147,7 +148,7 @@ public class TraineeController {
             @ApiResponse(code = 400, message = "Invalid request"),
             @ApiResponse(code = 404, message = "Trainee not found")
     })
-    public ResponseEntity<List<TrainerDtoResponse>> updateTraineeTrainers(@PathVariable("username")String username, @RequestBody UpdateTrainer request) {
+    public ResponseEntity<List<TrainerDtoResponse>> updateTraineeTrainers(@PathVariable("username") String username, @RequestBody UpdateTrainer request) {
         traineeMetrics.incrementUpdateTraineeTrainersCounter();
         List<TrainerDtoResponse> updatedTrainers = trainerService.updateTraineeTrainers(username, request.getTrainerUsernames());
         return ResponseEntity.ok(updatedTrainers);
@@ -177,6 +178,7 @@ public class TraineeController {
 
         return ResponseEntity.ok(response);
     }
+
     @PatchMapping("/{username}")
     @ApiOperation(value = "Activate/deactivate a trainee")
     @ApiResponses(value = {
@@ -184,13 +186,12 @@ public class TraineeController {
             @ApiResponse(code = 400, message = "Invalid request"),
             @ApiResponse(code = 404, message = "Trainee not found")
     })
-    public ResponseEntity<Void> activateTrainee(@PathVariable("username")String username,@RequestParam("isActive") boolean isActive) {
+    public ResponseEntity<Void> activateTrainee(@PathVariable("username") String username, @RequestParam("isActive") boolean isActive) {
 
         traineeMetrics.incrementActivateTraineeCounter();
         traineeService.setTraineeActiveStatus(username, isActive);
         return ResponseEntity.ok().build();
     }
-
 
 
 }

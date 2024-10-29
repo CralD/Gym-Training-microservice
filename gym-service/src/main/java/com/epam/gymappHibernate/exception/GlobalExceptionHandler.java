@@ -13,6 +13,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleTraineeNotFoundException(NoTrainingsFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
+
     @ExceptionHandler(InvalidDataException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<String> handleInvalidDataException(InvalidDataException ex) {
