@@ -72,7 +72,7 @@ public class TrainerService {
         return Optional.empty();
     }
 
-
+    @JmsListener(destination = "trainer.hour.queue")
     public Optional<Double> getTotalHoursForMonth(String username, String yearMonth) {
         if (username == null || username.isEmpty()) {
             throw new IllegalArgumentException("Username must not be null or empty");

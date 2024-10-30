@@ -91,15 +91,18 @@ public class TraineeService {
         TrainerWorkloadDto dto = new TrainerWorkloadDto();
         dto.setUserName(username);
         dto.setActionType("DELETE");
-        ResponseEntity<?> response = trainerService.registerTrainerTraining(dto);
-        if (response.getStatusCode().is2xxSuccessful()) {
-            // If successful, delete the trainee in Microservice 1
+        if (traineeRepository.getTraineeByUsername(username) == null) {
+            logger.warn("No trainee found with username: {}. Deletion skipped.", username);
+            return false;
+        }
+
+        try {
             jmsTemplate.convertAndSend(TRAINEE_QUEUE, dto);
             traineeRepository.deleteTraineeByUsername(username);
-            logger.info("Transaction ID: " + transactionId + "Trainee and training deleted successfully for username: {}", username);
+            logger.info("Transaction ID: " + transactionId + " Trainee deleted successfully for username: {}", username);
             return true;
-        } else {
-            logger.error("Failed to delete training for username: {}", username);
+        } catch (Exception e) {
+            logger.error("Failed to delete trainee for username: {}. Error: {}", username, e.getMessage());
             return false;
         }
 

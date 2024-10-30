@@ -8,6 +8,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableFeignClients
+@EnableEncryptableProperties
 public class GymAppHibernateApplication {
 
     public static void main(String[] args) {

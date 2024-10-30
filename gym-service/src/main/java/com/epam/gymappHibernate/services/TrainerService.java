@@ -11,17 +11,18 @@ import com.epam.gymappHibernate.entity.TrainingType;
 import com.epam.gymappHibernate.entity.User;
 import com.epam.gymappHibernate.util.PasswordGenerator;
 import com.epam.gymappHibernate.util.UsernameGenerator;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +38,10 @@ public class TrainerService {
     @Autowired
     private PasswordEncoder passwordEncoder;
     private static final Logger logger = LoggerFactory.getLogger(TraineeService.class);
+    @Autowired
+    private JmsTemplate jmstemplate;
+
+    private static final String HOURS_QUEUE = "trainer.hour.queue";
 
     @Autowired
     public TrainerService(TrainerRepository trainerRepository, UserRepository userRepository, TrainingTypeRepository trainingTypeRepository, TraineeRepository traineeRepository) {
@@ -177,6 +182,14 @@ public class TrainerService {
         return trainers.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+    @CircuitBreaker(name = "TrainingService")
+    public void getTotalTrainingHoursForMonth(String username, String yearMonth) {
+        Map<String, String> messagePayload = new HashMap<>();
+        messagePayload.put("username", username);
+        messagePayload.put("yearMonth", yearMonth);
+        jmstemplate.convertAndSend(HOURS_QUEUE, messagePayload);
+        logger.info("JMS message sent for username: {} and yearMonth: {}", username, yearMonth);
     }
 
 

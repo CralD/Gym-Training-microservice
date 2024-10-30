@@ -130,5 +130,10 @@ public class TrainerController {
         trainerMetrics.setTrainerUpdateStatus(true);
         return ResponseEntity.ok().build();
     }
+    @GetMapping("/{username}/{yearMonth}")
+    public ResponseEntity<Void> requestTrainingHoursForMonth(@PathVariable String username, @PathVariable String yearMonth) {
+        trainerService.getTotalTrainingHoursForMonth(username, yearMonth);
+        return ResponseEntity.accepted().build();
+    }
 
 }

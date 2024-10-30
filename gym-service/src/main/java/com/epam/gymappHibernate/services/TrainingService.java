@@ -71,10 +71,10 @@ public class TrainingService {
 
         Trainer trainer = trainerRepository.getTrainerByUsername(Trainerusername);
         Date date = request.getTrainingDate();
-        ZoneId systemDefault = ZoneId.systemDefault(); // Consider using a specific zone if needed
+        ZoneId systemDefault = ZoneId.systemDefault();
         OffsetDateTime offsetDateTime = date.toInstant().atZone(systemDefault).toOffsetDateTime();
 
-        // Format to ISO 8601 string
+
         DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
         String isoDate = formatter.format(offsetDateTime);
 
@@ -82,7 +82,7 @@ public class TrainingService {
         dto.setUserName(trainer.getUser().getUserName());
         dto.setFirstName(trainer.getUser().getFirstName());
         dto.setLastName(trainer.getUser().getLastName());
-        dto.setStatus(true); // Assuming the status is always true when adding new training
+        dto.setStatus(true);
         dto.setTrainingDate(isoDate);
         dto.setTrainingDuration(request.getTrainingDuration());
         dto.setActionType("ADD");
