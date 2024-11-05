@@ -3,8 +3,7 @@ package com.epam.trainer_service.service;
 import com.epam.trainer_service.dto.TrainerWorkloadDto;
 import com.epam.trainer_service.entity.Trainer;
 import com.epam.trainer_service.repository.TrainerRepository;
-import jakarta.transaction.Transactional;
-import org.slf4j.ILoggerFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +16,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class TrainerService {
@@ -34,7 +31,7 @@ public class TrainerService {
         this.trainerRepository = trainerRepository;
     }
 
-    @Transactional
+
     @JmsListener(destination = "trainee.delete.queue,training.add.queue")
     public Optional<Trainer> saveOrUpdateUserTraining(TrainerWorkloadDto request) {
         Trainer userTraining;
@@ -55,15 +52,15 @@ public class TrainerService {
             userTraining.setLastName(request.getLastName());
             userTraining.setActive(request.isStatus());
 
-            Map<String, Double> trainingDetails = new HashMap<>();
+            Map<String, List<Double>> trainingDetails = new HashMap<>();
             if (formattedDate != null) {
-                trainingDetails.put(formattedDate, request.getTrainingDuration());
+                trainingDetails.put(formattedDate, Collections.singletonList(request.getTrainingDuration()));
                 userTraining.setTrainingSummary(trainingDetails);
             }
             logInfo.info("Trainer training Saved");
             return Optional.of(trainerRepository.save(userTraining));
         } else if ("delete".equalsIgnoreCase(request.getActionType())) {
-            userTraining = trainerRepository.findByUserName(request.getUserName());
+            userTraining = (Trainer) trainerRepository.findByUserName(request.getUserName());
             if (userTraining != null) {
                 trainerRepository.deleteById(userTraining.getTrainerId());
             }
@@ -78,11 +75,16 @@ public class TrainerService {
             throw new IllegalArgumentException("Username must not be null or empty");
         }
 
-        Trainer trainer = trainerRepository.findByUserName(username);
-        if (trainer != null) {
-            Map<String, Double> trainingDetails = trainer.getTrainingSummary();
-            logInfo.info("Total hours for Trainer this month");
-            return Optional.ofNullable(trainingDetails.get(yearMonth));
+        List<Trainer> trainers = trainerRepository.findByUserName(username);
+        if (!trainers.isEmpty()) {
+            // Assuming we are correctly choosing the right trainer; summarizing all if ambiguity in selection exists
+            double totalHours = trainers.stream()
+                    .flatMap(trainer -> Optional.ofNullable(trainer.getTrainingSummary().get(yearMonth))
+                            .orElse(Collections.emptyList()).stream())
+                    .mapToDouble(Double::doubleValue)
+                    .sum();
+            logInfo.info("Total hours for Trainer this month: " + totalHours);
+            return Optional.of(totalHours);
         }
 
         return Optional.empty();

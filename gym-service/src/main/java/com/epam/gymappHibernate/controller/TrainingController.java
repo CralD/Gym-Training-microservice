@@ -31,11 +31,11 @@ public class TrainingController {
             @ApiResponse(code = 400, message = "Invalid training data")
     })
     public ResponseEntity<Void> addTraining(@RequestBody TrainingDto request) {
-        try {
+       // try {
             trainingService.addTraining(request.getTraineeUsername(), request.getTrainerUsername(), request);
-        } catch (Exception e) {
-            throw new InvalidTrainingDataException("Invalid training data provided");
-        }
+     //   } catch (Exception e) {
+       //     throw new InvalidTrainingDataException("Invalid training data provided");
+      //  }
         return ResponseEntity.ok().build();
     }
 

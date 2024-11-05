@@ -1,29 +1,30 @@
 package com.epam.trainer_service.entity;
 
-import jakarta.persistence.*;
+
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import java.util.Date;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-@Entity
-@Table(name = "TRAINER")
+@Document
 @Getter
 @Setter
 public class Trainer {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long trainerId;
+    private String trainerId;
+
     private String userName;
+    @Indexed
     private String firstName;
+    @Indexed
     private String lastName;
     private boolean isActive;
 
-    @ElementCollection
-    @CollectionTable(name = "training_details", joinColumns = @JoinColumn(name = "user_id"))
-    @MapKeyColumn(name = "year_month")
-    @Column(name = "summary_duration")
-    private Map<String, Double> trainingSummary;
+
+    private Map<String, List<Double>> trainingSummary;
 }
