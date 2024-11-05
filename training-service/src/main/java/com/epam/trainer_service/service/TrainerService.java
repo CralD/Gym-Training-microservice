@@ -77,7 +77,7 @@ public class TrainerService {
 
         List<Trainer> trainers = trainerRepository.findByUserName(username);
         if (!trainers.isEmpty()) {
-            // Assuming we are correctly choosing the right trainer; summarizing all if ambiguity in selection exists
+
             double totalHours = trainers.stream()
                     .flatMap(trainer -> Optional.ofNullable(trainer.getTrainingSummary().get(yearMonth))
                             .orElse(Collections.emptyList()).stream())
