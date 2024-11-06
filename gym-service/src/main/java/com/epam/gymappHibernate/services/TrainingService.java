@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class TrainingService {
-    @Autowired
+
     private TrainingRepository trainingRepository;
     private TraineeRepository traineeRepository;
     private TrainerRepository trainerRepository;
@@ -41,18 +41,19 @@ public class TrainingService {
     private TrainingServiceMicrosService trainingMicroservice;
 
     private static final String TRAINING_QUEUE = "training.add.queue";
-    @Autowired
+
     private JmsTemplate jmsTemplate;
 
     private static final Logger logger = LoggerFactory.getLogger(TrainingService.class);
 
     @Autowired
-    public TrainingService(TrainingRepository trainingRepository, TrainerRepository trainerRepository, TraineeRepository traineeRepository, TrainingTypeRepository trainingTypeRepository, TrainingServiceMicrosService trainingMicroservice) {
+    public TrainingService(TrainingRepository trainingRepository, TrainerRepository trainerRepository, TraineeRepository traineeRepository, TrainingTypeRepository trainingTypeRepository, TrainingServiceMicrosService trainingMicroservice,JmsTemplate jmsTemplate) {
         this.trainingRepository = trainingRepository;
         this.traineeRepository = traineeRepository;
         this.trainerRepository = trainerRepository;
         this.trainingTypeRepository = trainingTypeRepository;
         this.trainingMicroservice = trainingMicroservice;
+        this.jmsTemplate = jmsTemplate;
     }
 
     String transactionId = UUID.randomUUID().toString();

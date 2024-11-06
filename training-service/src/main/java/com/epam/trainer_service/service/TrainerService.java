@@ -21,14 +21,16 @@ import java.util.*;
 @Service
 public class TrainerService {
     private static final Logger logInfo = LoggerFactory.getLogger(TrainerService.class);
-    @Autowired
+
     private JmsTemplate jmsTemplate;
 
     private TrainerRepository trainerRepository;
 
     @Autowired
-    public TrainerService(TrainerRepository trainerRepository) {
+    public TrainerService(TrainerRepository trainerRepository,JmsTemplate jmsTemplate) {
+
         this.trainerRepository = trainerRepository;
+        this.jmsTemplate = jmsTemplate;
     }
 
 

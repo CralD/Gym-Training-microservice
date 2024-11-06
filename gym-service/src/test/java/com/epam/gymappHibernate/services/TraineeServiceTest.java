@@ -2,28 +2,27 @@ package com.epam.gymappHibernate.services;
 
 import com.epam.gymappHibernate.dao.TraineeRepository;
 import com.epam.gymappHibernate.dao.UserRepository;
-import com.epam.gymappHibernate.dto.CredentialsDto;
 import com.epam.gymappHibernate.dto.TraineeDto;
+import com.epam.gymappHibernate.dto.TrainerWorkloadDto;
 import com.epam.gymappHibernate.entity.Trainee;
 import com.epam.gymappHibernate.entity.User;
 import com.epam.gymappHibernate.exception.NoTrainingsFoundException;
-import com.epam.gymappHibernate.util.PasswordGenerator;
-import com.epam.gymappHibernate.util.UsernameGenerator;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+
 
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+
 import java.util.Date;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -34,6 +33,7 @@ import static org.mockito.Mockito.*;
         "some.encrypted.property=plainTextValue"
 })
 class TraineeServiceTest {
+
 
     @Mock
     private TraineeRepository traineeRepository;
@@ -46,6 +46,9 @@ class TraineeServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private JmsTemplate jmsTemplate;
 
     private Trainee trainee;
 
@@ -97,23 +100,24 @@ class TraineeServiceTest {
     @Test
     public void testDeleteTraineeSuccess() {
         String username = "Pedro.Garcia";
-        String password = "password";
+        Trainee trainee = new Trainee();
+        trainee.setUser(new User());
+
         when(traineeRepository.getTraineeByUsername(username)).thenReturn(trainee);
-        trainee.getUser().setPassword(password);
+
         traineeService.deleteTrainee(username);
+
         verify(traineeRepository, times(1)).deleteTraineeByUsername(username);
+        verify(jmsTemplate, times(1)).convertAndSend(eq("trainee.delete.queue"), any(TrainerWorkloadDto.class));
     }
-
     @Test
-    public void testDeleteTraineeFailure() {
+    public void testDeleteTraineeWhenNotFound() {
         String username = "johndoe";
+        when(traineeRepository.getTraineeByUsername(username)).thenReturn(null);
 
-        doThrow(new SecurityException("Not allowed to delete this trainee.")).when(traineeRepository).deleteTraineeByUsername(username);
-
-
-        assertThrows(SecurityException.class, () -> {
-            traineeService.deleteTrainee(username);
-        });
+        boolean result = traineeService.deleteTrainee(username);
+        assertFalse(result);
+        verify(traineeRepository, never()).deleteTraineeByUsername(username);
     }
 
     @Test

@@ -1,12 +1,16 @@
 package com.epam.gymappHibernate.services;
 
+
 import com.epam.gymappHibernate.dao.TrainingRepository;
+
 import com.epam.gymappHibernate.entity.Training;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Collections;
@@ -20,6 +24,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @TestPropertySource(properties = "spring.datasource.url=jdbc:h2:mem:testdb7")
 class TrainingServiceTest {
+
 
     @Mock
     private TrainingRepository trainingRepository;
@@ -42,6 +47,7 @@ class TrainingServiceTest {
         trainingService.saveTraining(training);
         verify(trainingRepository, times(1)).saveTraining(training);
     }
+
 
     @Test
     public void testGetTraineeTrainings() {

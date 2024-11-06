@@ -31,14 +31,14 @@ import java.util.stream.Collectors;
 
 @Service
 public class TraineeService {
-    @Autowired
+
     private final TraineeRepository traineeRepository;
-    @Autowired
+
     private final UserRepository userRepository;
     private final TrainingServiceMicrosService trainerService;
     private static final String TRAINEE_QUEUE = "trainee.delete.queue";
-    @Autowired
-    private JmsTemplate jmsTemplate;
+
+    private final JmsTemplate jmsTemplate;
 
 
     private static final Logger logger = LoggerFactory.getLogger(TraineeService.class);
@@ -47,10 +47,11 @@ public class TraineeService {
 
 
     @Autowired
-    public TraineeService(TraineeRepository traineeRepository, UserRepository userRepository, TrainingServiceMicrosService trainerService) {
+    public TraineeService(TraineeRepository traineeRepository, UserRepository userRepository, TrainingServiceMicrosService trainerService,JmsTemplate jmsTemplate) {
         this.traineeRepository = traineeRepository;
         this.userRepository = userRepository;
         this.trainerService = trainerService;
+        this.jmsTemplate = jmsTemplate;
 
     }
 
