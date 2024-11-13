@@ -11,9 +11,9 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
+
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -62,9 +62,10 @@ public class TrainerService {
             logInfo.info("Trainer training Saved");
             return Optional.of(trainerRepository.save(userTraining));
         } else if ("delete".equalsIgnoreCase(request.getActionType())) {
-            userTraining = (Trainer) trainerRepository.findByUserName(request.getUserName());
-            if (userTraining != null) {
-                trainerRepository.deleteById(userTraining.getTrainerId());
+            List<Trainer> trainers = trainerRepository.findByUserName(request.getUserName());
+            if (!trainers.isEmpty()) {
+                trainerRepository.deleteById(trainers.get(0).getTrainerId());
+                logInfo.info("Trainer removed.");       // Specific log
             }
             return Optional.empty();
         }
@@ -89,6 +90,6 @@ public class TrainerService {
             return Optional.of(totalHours);
         }
 
-        return Optional.empty();
+        return Optional.of(0.0);
     }
 }

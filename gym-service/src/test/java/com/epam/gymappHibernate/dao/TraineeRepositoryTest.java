@@ -45,6 +45,7 @@ class TraineeRepositoryTest {
 
 
     @Test
+    @Transactional
     public void testSaveTrainee1() {
         User user = new User();
         user.setFirstName("Test");
@@ -130,6 +131,7 @@ class TraineeRepositoryTest {
 
 
     @Test
+    @Transactional
     public void testGetTraineeByUsername() {
         User user = new User();
         user.setFirstName("pedro");
@@ -152,11 +154,12 @@ class TraineeRepositoryTest {
 
 
     @Test
+    @Transactional
     public void testFindAll() {
 
         when(entityManager.createQuery("SELECT t FROM Trainee t", Trainee.class)).thenReturn(query);
         List<Trainee> result = traineeRepository.findAll();
-        assertEquals(7, result.size());
+        assertEquals(6, result.size());
 
     }
 

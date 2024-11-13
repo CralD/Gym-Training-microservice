@@ -13,9 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -53,7 +51,7 @@ class TrainerServiceTest {
         trainer.setLastName(workloadDto.getLastName());
         trainer.setActive(workloadDto.isStatus());
         trainer.setTrainingSummary(new HashMap<>());
-        trainer.getTrainingSummary().put(workloadDto.getTrainingDate(), workloadDto.getTrainingDuration());
+        trainer.getTrainingSummary().put(workloadDto.getTrainingDate(), Collections.singletonList(workloadDto.getTrainingDuration()));
 
         when(trainerRepository.save(any(Trainer.class))).thenReturn(trainer);
 
@@ -73,18 +71,18 @@ class TrainerServiceTest {
                 "DELETE");
 
         Trainer trainer = new Trainer();
-        trainer.setTrainerId(1L);
+        trainer.setTrainerId("1L");
         trainer.setUserName("Juan.Perez");
 
-        when(trainerRepository.findByUserName("Juan.Perez")).thenReturn(trainer);
-        doNothing().when(trainerRepository).deleteById(1L);
+        when(trainerRepository.findByUserName("Juan.Perez")).thenReturn(Collections.singletonList(trainer));
+        doNothing().when(trainerRepository).deleteById("1L");
 
         // Call the service method
         Optional<Trainer> result = trainerService.saveOrUpdateUserTraining(workloadDto);
 
         // Verify interactions and assert results
         verify(trainerRepository).findByUserName("Juan.Perez");
-        verify(trainerRepository).deleteById(1L);
+        verify(trainerRepository).deleteById("1L");
         assert (result.isEmpty());
     }
 
@@ -95,17 +93,17 @@ class TrainerServiceTest {
         double expectedHours = 15.0;
 
         Trainer trainer = new Trainer();
-        Map<String, Double> trainingDetails = new HashMap<>();
-        trainingDetails.put(yearMonth, expectedHours);
+        Map<String, List<Double>> trainingDetails = new HashMap<>();
+        trainingDetails.put(yearMonth, Collections.singletonList(expectedHours));
         trainer.setTrainingSummary(trainingDetails);
 
-        when(trainerRepository.findByUserName(username)).thenReturn(trainer);
+        when(trainerRepository.findByUserName(username)).thenReturn(Collections.singletonList(trainer));
 
-        // Execution
         Optional<Double> actualHours = trainerService.getTotalHoursForMonth(username, yearMonth);
 
-        // Assertion
-        assertEquals(expectedHours, actualHours);
+
+        assertTrue(actualHours.isPresent());
+        assertEquals(expectedHours, actualHours.get(), 0.01);
 
     }
 
@@ -116,16 +114,17 @@ class TrainerServiceTest {
         String yearMonth = "2022-01";
 
         Trainer trainer = new Trainer();
-        Map<String, Double> trainingDetails = new HashMap<>();
-        trainer.setTrainingSummary(trainingDetails);  // No entry for the yearMonth
+        Map<String, List<Double>> trainingDetails = new HashMap<>();
+        trainer.setTrainingSummary(trainingDetails);
 
-        when(trainerRepository.findByUserName(username)).thenReturn(trainer);
+        when(trainerRepository.findByUserName(username)).thenReturn(Collections.singletonList(trainer));
 
-        // Execution
+
         Optional<Double> actualHours = trainerService.getTotalHoursForMonth(username, yearMonth);
 
-        // Assertion
-        assertEquals(0.0, actualHours);
+
+        assertTrue(actualHours.isPresent());
+        assertEquals(0.0, actualHours.get(), 0.01);
     }
 
     @Test
@@ -134,13 +133,14 @@ class TrainerServiceTest {
         String username = "john_doe";
         String yearMonth = "2022-01";
 
-        when(trainerRepository.findByUserName(username)).thenReturn(null);
+        when(trainerRepository.findByUserName(username)).thenReturn(Collections.emptyList());
 
-        // Execution
+
         Optional<Double> actualHours = trainerService.getTotalHoursForMonth(username, yearMonth);
 
-        // Assertion
-        assertEquals(0.0, actualHours);
+
+        assertTrue(actualHours.isPresent(), "Expected result to be present.");
+        assertEquals(0.0, actualHours.get(), 0.01, "Expected hours to be zero.");
     }
 
 
