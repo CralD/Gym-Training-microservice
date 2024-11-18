@@ -27,3 +27,17 @@ Feature: Trainee
     Then The trainee Delete profile should be skipped
 
 
+  Scenario: Failed authentication due to incorrect password
+    Given a trainee with username "Juliana.Juarez" exists in the system
+    And the password for "Juliana.Juarez" is "correctPassword"
+    When I attempt to authenticate with username "Juliana.Juarez" and password "wrongPassword"
+    Then the authentication should fail
+
+  Scenario: failed post Login
+    Given a registered user with username "Juliana.Juarez"
+    When I send a POST request to "/api/auth/login" with username "Juliana.Juarez"
+    Then the response should be code 403
+
+
+
+
