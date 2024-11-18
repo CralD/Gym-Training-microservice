@@ -1,33 +1,37 @@
 package com.epam.gymappHibernate.cucumber;
 
-import com.epam.gymappHibernate.GymAppHibernateApplication;
 import com.epam.gymappHibernate.GymAppHibernateApplicationTests;
 import com.epam.gymappHibernate.dao.TraineeRepository;
 import com.epam.gymappHibernate.dto.CredentialsDto;
 import com.epam.gymappHibernate.dto.TraineeDto;
+
 import com.epam.gymappHibernate.dto.UserDto;
 import com.epam.gymappHibernate.entity.Trainee;
 import com.epam.gymappHibernate.entity.User;
 import com.epam.gymappHibernate.services.TraineeService;
+import com.epam.gymappHibernate.services.TrainingService;
 import com.epam.gymappHibernate.util.JwtUtil;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.CucumberContextConfiguration;
+import org.slf4j.Logger;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+
 @CucumberContextConfiguration
 public class TraineeStep extends GymAppHibernateApplicationTests {
     @Autowired
@@ -42,9 +46,20 @@ public class TraineeStep extends GymAppHibernateApplicationTests {
     String token;
     @Autowired
     private JwtUtil jwtUtil;
+   @MockBean
+    private JmsTemplate jmsTemplate;
+
+    private Logger logger;
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private TrainingService trainingService;
+
+    private boolean result;
+
+    private static final String TRAINEE_QUEUE = "trainee.delete.queue";
 
 
     @Given("Juliana wants to register as a trainee in the gym")
@@ -244,4 +259,64 @@ public class TraineeStep extends GymAppHibernateApplicationTests {
         ResponseEntity<Void> response = testRestTemplate.exchange("/api/trainees/{username}", HttpMethod.DELETE, entity, Void.class,username);
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Failed to delete trainee profile");
     }
+
+    @Given("a trainee with username {string} exists in the system")
+    public void aTraineeWithUsernameExistsInTheSystem(String username) {
+        User user = new User();
+        user.setUserName(username);
+        user.setPassword("correctPassword");
+        Trainee trainee = new Trainee();
+        trainee.setUser(user);
+        traineeRepository.getTraineeByUsername(username);
+    }
+
+    @And("the password for {string} is {string}")
+    public void thePasswordForIs(String username, String password) {
+
+    }
+
+    @When("I attempt to authenticate with username {string} and password {string}")
+    public void iAttemptToAuthenticateWithUsernameAndPassword(String username, String password) {
+        result = traineeService.authenticate(username, password);
+    }
+
+    @Then("the authentication should fail")
+    public void theAuthenticationShouldFail() {
+        assertFalse(result);
+    }
+
+    @Given("a registered user with username {string}")
+    public void aRegisteredUserWithUsernameAndPassword(String username) {
+        User user = new User();
+        user.setUserName("Juliana.Juarez");
+        user.setFirstName("Juliana");
+        user.setLastName("Juarez");
+        user.setPassword("1234567890");
+        Trainee trainee = new Trainee();
+        trainee.setUser(user);
+        trainee.setAddress("carrera 35 #57");
+        trainee.setDateOfBirth(new Date());
+        credentialsResponse = new CredentialsDto(user.getUserName(),user.getPassword());
+
+
+
+
+    }
+
+    @When("I send a POST request to {string} with username {string}")
+    public void iSendAPostRequestToWithUsernameAndPassword(String url, String username) {
+
+        response = testRestTemplate.postForEntity(url, credentialsResponse, String.class);
+    }
+
+    @Then("the response should be code {int}")
+    public void theResponseShouldBe3(int statusCode2) {
+        int actualStatusCode = response.getStatusCodeValue();
+        assertEquals(statusCode2, actualStatusCode);
+    }
+
+
+
+
+
 }
