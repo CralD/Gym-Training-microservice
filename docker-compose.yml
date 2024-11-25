@@ -1,0 +1,76 @@
+
+services:
+  eureka-server:
+    image: eureka-server:latest
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - training-network
+
+  activemq:
+
+    image: rmohr/activemq
+    container_name: activemq
+    environment:
+      ACTIVEMQ_ADMIN_LOGIN: ${ACTIVEMQ_USER}
+      ACTIVEMQ_ADMIN_PASSWORD: ${ACTIVEMQ_PASSWORD}
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+    networks:
+      - training-network
+
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - training-network
+
+  gym-service:
+    image: gym-service:latest
+    container_name: gym-service
+    depends_on:
+      - eureka-server
+      - activemq
+    environment:
+      JASYPT_ENCRYPTOR_PASSWORD: ${JASYPT_ENCRYPTOR_PASSWORD}
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/trainingdb
+      SPRING_ACTIVEMQ_BROKER_URL: tcp://activemq:61616
+      SPRING_ACTIVEMQ_USER: ${ACTIVEMQ_USER}
+      SPRING_ACTIVEMQ_PASSWORD: ${ACTIVEMQ_PASSWORD}
+    ports:
+      - "8080:8080"
+    networks:
+      - training-network
+
+  training-service:
+    image: training-service:latest
+    container_name: training-service
+    depends_on:
+      - eureka-server
+      - activemq
+      - mongodb
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/trainingdb
+      SPRING_DATA_MONGODB_USERNAME: ${MONGODB_USERNAME}
+      SPRING_DATA_MONGODB_PASSWORD: ${MONGODB_PASSWORD}
+      SPRING_ACTIVEMQ_BROKER_URL: tcp://activemq:61616
+      SPRING_ACTIVEMQ_USER: ${ACTIVEMQ_USER}
+      SPRING_ACTIVEMQ_PASSWORD: ${ACTIVEMQ_USER}
+    ports:
+      - "8082:8082"
+    networks:
+      - training-network
+
+networks:
+  training-network:
+    driver: bridge
+
+volumes:
+  mongodb-data:
